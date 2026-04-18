@@ -1,287 +1,223 @@
+<div align="center">
+
+<img src="https://img.shields.io/badge/Fin-Forge-4F46E5?style=for-the-badge&logoColor=white" alt="Fin Forge" height="60"/>
+
 # Fin Forge
 
-Fin Forge is a full-stack financial management website built to help users manage income, expenses, and financial activity through a modern, responsive, and analytics-driven interface.
+**A full-stack financial management platform with real-time analytics, secure authentication, and multi-currency support.**
 
-The platform combines a polished React frontend with a Node.js + Express backend, MongoDB for persistent data storage, JWT-based authentication, and financial visualizations powered by Recharts. It is designed as a portfolio-ready project that demonstrates both frontend craftsmanship and backend integration.
+[![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Express](https://img.shields.io/badge/Express-000000?style=flat-square&logo=express&logoColor=white)](https://expressjs.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![JWT](https://img.shields.io/badge/JWT-000000?style=flat-square&logo=jsonwebtokens&logoColor=white)](https://jwt.io/)
+
+[Features](#-features) · [Tech Stack](#-tech-stack) · [Getting Started](#-getting-started) · [Project Structure](#-project-structure) · [Roadmap](#-roadmap)
+
+</div>
 
 ---
 
 ## Overview
 
-Fin Forge provides users with a structured way to monitor their finances in one place. After registering and logging in, users can securely manage transactions, review balance summaries, analyze spending habits, and understand monthly financial trends through visual insights.
+Fin Forge is a portfolio-quality, full-stack financial management web application. It allows users to securely track income and expenses, visualize spending habits, and analyze monthly financial trends — all within a clean, responsive, dark-mode interface.
 
-The project was built to reflect a realistic full-stack product experience, with emphasis on usability, security, responsiveness, and clean interface design.
-
----
-
-## Highlights
-
-- Full-stack financial management website
-- Secure JWT-based authentication
-- User-specific transaction management
-- Interactive analytics and chart-driven insights
-- Responsive design across desktop, tablet, and mobile
-- Dark mode support
-- Multi-currency display support
-- Portfolio-quality landing page and product presentation
+Built with a React + Vite frontend and a Node.js + Express backend, it uses MongoDB for persistent storage and JWT for secure, user-scoped authentication.
 
 ---
 
-## Core Features
+## ✨ Features
 
-### Authentication & Security
+### 🔐 Authentication & Security
 - User registration with validation
-- Secure login with JWT authentication
+- Secure login with JWT-based authentication
 - Protected routes and authenticated API access
-- User-scoped financial data handling
+- User-scoped data — each user only sees their own records
 
-### Transaction Management
+### 💸 Transaction Management
 - Add income and expense transactions
-- Edit existing transaction records
-- Delete transactions
-- View transaction history
-- Filter and sort transaction data
+- Edit and delete existing records
+- View full transaction history
+- Filter and sort transactions
 
-### Dashboard & Analytics
-- Total balance overview
-- Total income and expense summaries
+### 📊 Dashboard & Analytics
+- Total balance, income, and expense summaries
 - Balance trend visualization
-- Monthly income vs expense comparison
-- Spending category breakdown
-- Financial insights based on transaction activity
+- Monthly income vs. expense comparison chart
+- Category-wise spending breakdown
+- Smart financial insights based on activity
 
-### User Experience
-- Clean and modern landing page
-- Responsive layout for all screen sizes
-- Multi-currency display support
+### 🎨 User Experience
+- Responsive layout for desktop, tablet, and mobile
 - Dark mode interface
-- Empty states for new users
-- Smooth and structured UI flow
+- Multi-currency display support
+- Empty state handling for new users
+- Polished landing page with product presentation
 
 ---
 
-## Tech Stack
+## 🛠 Tech Stack
 
-### Frontend
-- React
-- Vite
-- Tailwind CSS
-- React Router DOM
-- Recharts
-- Lucide React
-
-### Backend
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose
-- JSON Web Token (JWT)
-- bcryptjs
-- dotenv
-- cors
+| Layer | Technologies |
+|-------|-------------|
+| **Frontend** | React, Vite, Tailwind CSS, React Router DOM, Recharts, Lucide React |
+| **Backend** | Node.js, Express.js |
+| **Database** | MongoDB, Mongoose |
+| **Auth** | JSON Web Token (JWT), bcryptjs |
+| **Utilities** | dotenv, cors |
 
 ---
 
-## Architecture
+## 🚀 Getting Started
 
-Fin Forge follows a straightforward full-stack architecture:
+### Prerequisites
 
-- **Frontend** handles UI rendering, routing, state management, data presentation, and analytics visualization.
-- **Backend** manages authentication, protected API routes, business logic, and MongoDB operations.
-- **MongoDB** stores users and transactions persistently.
-- **JWT Authentication** secures access to protected resources and ensures that users only interact with their own data.
+- Node.js (v18+)
+- MongoDB URI (local or [Atlas](https://www.mongodb.com/atlas))
+- Exchange Rate API key (for multi-currency support)
 
----
-
-## Project Structure
+### 1. Clone the Repository
 
 ```bash
-Finance Dashboard UI/
-│
-├── Backend/
-│   ├── middleware/
-│   │   └── auth.js
-│   ├── models/
-│   │   ├── Transaction.js
-│   │   └── Users.js
-│   ├── .env
-│   ├── package.json
-│   └── server.js
-│
-├── Frontend/
-│   ├── public/
-│   │   └── favicon.svg
-│   ├── src/
-│   │   ├── assets/
-│   │   │   └── finforge-logo.svg
-│   │   ├── components/
-│   │   │   ├── Header.jsx
-│   │   │   ├── InsightsSection.jsx
-│   │   │   ├── OverviewSection.jsx
-│   │   │   ├── SummaryCard.jsx
-│   │   │   ├── TransactionForm.jsx
-│   │   │   ├── TransactionsSection.jsx
-│   │   │   └── TransactionTable.jsx
-│   │   ├── context/
-│   │   │   └── DataContext.jsx
-│   │   ├── hooks/
-│   │   │   ├── useCurrency.js
-│   │   │   └── useFinancialData.js
-│   │   ├── pages/
-│   │   │   ├── Dashboard.jsx
-│   │   │   ├── LandingPage.jsx
-│   │   │   ├── Login.jsx
-│   │   │   └── Register.jsx
-│   │   ├── utils/
-│   │   │   └── helpers.js
-│   │   ├── App.jsx
-│   │   ├── index.css
-│   │   └── main.jsx
-│   ├── .env
-│   ├── index.html
-│   ├── package.json
-│   └── README.md
-
-How It Works
-1. User Authentication
-A user can create an account through the registration page and log in securely using their credentials. On successful login, the backend generates a JWT token, which is used to authorize protected requests.
-
-2. Secure Data Access
-Each authenticated user only has access to their own transaction records. Protected routes verify the JWT token before returning or modifying financial data.
-
-3. Financial Dashboard
-After login, users can access a dashboard that presents:
-
-current balance
-total income
-total expenses
-category-wise spending insights
-monthly trend comparisons
-financial summaries through visual charts
-4. Transaction CRUD
-Users can:
-
-create new income or expense records
-update existing transactions
-delete transactions
-review transaction history
-filter and sort records for better analysis
-Installation & Setup
-1. Clone the repository
 git clone https://github.com/your-username/fin-forge.git
 cd fin-forge
-2. Setup Backend
-Move into the backend folder:
+```
 
+### 2. Set Up the Backend
+
+```bash
 cd Backend
 npm install
-Create a .env file inside Backend/ and add:
+```
 
+Create a `.env` file inside `Backend/`:
+
+```env
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
 PORT=5000
-Start the backend server:
+```
 
+Start the server:
+
+```bash
 npm start
-3. Setup Frontend
-Open a new terminal and move into the frontend folder:
+```
 
+### 3. Set Up the Frontend
+
+Open a new terminal:
+
+```bash
 cd Frontend
 npm install
-Create a .env file inside Frontend/ and add:
+```
 
+Create a `.env` file inside `Frontend/`:
+
+```env
 VITE_API_BASE_URL=http://localhost:5000
 VITE_EXCHANGE_API_KEY=your_exchange_rate_api_key
-Start the frontend:
+```
 
+Start the dev server:
+
+```bash
 npm run dev
-Running the Project
-Backend
-cd Backend
-npm start
-Frontend
-cd Frontend
-npm run dev
-Default Local URLs
-Frontend: http://localhost:5173
-Backend: http://localhost:5000
-Key Functionalities
-Protected API Access
-The backend secures sensitive routes through JWT middleware. Authenticated users can:
+```
 
-fetch their transactions
-add transactions
-update transactions
-delete transactions
-retrieve their profile data
-Dynamic Financial Analytics
-The dashboard calculates and displays:
+### 4. Open in Browser
 
-total balance
-total income
-total expenses
-monthly financial trends
-category-wise expense breakdown
-top spending category
-month-over-month comparisons
-Multi-Currency Support
-The frontend supports multiple display currencies and uses exchange-rate data for converting values at the UI level.
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost:5173 |
+| Backend | http://localhost:5000 |
 
-Responsive Experience
-Fin Forge is optimized for:
+---
 
-desktop layouts
-tablet interfaces
-mobile screens
-Screens & Pages
-Landing Page
-Introduces the product, highlights its key features, presents the product value proposition, and directs users to login or registration.
+## 📁 Project Structure
 
-Register Page
-Allows new users to create an account.
+```
+fin-forge/
+│
+├── Backend/
+│   ├── middleware/
+│   │   └── auth.js              # JWT verification middleware
+│   ├── models/
+│   │   ├── Transaction.js       # Transaction schema
+│   │   └── Users.js             # User schema
+│   ├── .env
+│   ├── package.json
+│   └── server.js                # Express app entry point
+│
+└── Frontend/
+    ├── public/
+    │   └── favicon.svg
+    ├── src/
+    │   ├── assets/
+    │   │   └── finforge-logo.svg
+    │   ├── components/
+    │   │   ├── Header.jsx
+    │   │   ├── InsightsSection.jsx
+    │   │   ├── OverviewSection.jsx
+    │   │   ├── SummaryCard.jsx
+    │   │   ├── TransactionForm.jsx
+    │   │   ├── TransactionsSection.jsx
+    │   │   └── TransactionTable.jsx
+    │   ├── context/
+    │   │   └── DataContext.jsx
+    │   ├── hooks/
+    │   │   ├── useCurrency.js
+    │   │   └── useFinancialData.js
+    │   ├── pages/
+    │   │   ├── Dashboard.jsx
+    │   │   ├── LandingPage.jsx
+    │   │   ├── Login.jsx
+    │   │   └── Register.jsx
+    │   ├── utils/
+    │   │   └── helpers.js
+    │   ├── App.jsx
+    │   ├── index.css
+    │   └── main.jsx
+    ├── .env
+    ├── index.html
+    └── package.json
+```
 
-Login Page
-Authenticates users and redirects them into the main dashboard experience.
+---
 
-Dashboard
-The core product interface for transaction management, balance tracking, and financial analytics.
+## 🔑 How It Works
 
-Why This Project Matters
-Fin Forge is more than a dashboard UI. It is a complete full-stack website that demonstrates practical product development across both client and server layers.
+1. **Register / Login** — Users create an account and receive a JWT token on login.
+2. **Protected Access** — The token authenticates every API request; users only access their own data.
+3. **Dashboard** — After login, users see their current balance, income/expense totals, and chart-based insights.
+4. **Transactions** — Users can create, edit, delete, and filter transactions. All changes reflect instantly in the analytics.
 
-This project showcases skills in:
+---
 
-frontend application development
-backend API design
-authentication and authorization
-database integration
-state management
-responsive interface design
-reusable component architecture
-chart-based data visualization
-product-oriented UI/UX thinking
-It is suitable for:
+## 🗺 Roadmap
 
-resume projects
-GitHub portfolio showcases
-internship applications
-frontend or full-stack interviews
-academic or personal project demonstrations
+Planned features for future iterations:
 
-Future Improvements
-Potential enhancements for future iterations include:
-CSV export for transactions
-budget goal tracking
-date-range based filtering
-user profile and settings page
-recurring transaction support
-demo account mode
-downloadable reports
-financial goal planning
-more advanced onboarding flow
+- [ ] CSV export for transaction history
+- [ ] Budget goal tracking
+- [ ] Date-range filtering
+- [ ] User profile & settings page
+- [ ] Recurring transaction support
+- [ ] Demo account mode
+- [ ] Downloadable financial reports
+- [ ] Financial goal planning
+- [ ] Advanced onboarding flow
 
-Author
-Sajad Bashir Mir
+---
 
-License
+## 👤 Author
+
+**Sajad Bashir Mir**
+
+---
+
+## 📄 License
+
 This project is open for learning, showcasing, and portfolio purposes.
