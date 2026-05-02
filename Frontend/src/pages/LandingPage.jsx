@@ -86,16 +86,16 @@ export default function LandingPage() {
       <nav className="sticky top-0 z-50 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-  <img
-    src={logo}
-    alt="Fin Forge logo"
-    className="w-10 h-10 rounded-2xl shadow-lg shadow-blue-500/20"
-  />
-  <div>
-    <p className="font-bold text-slate-900 dark:text-white tracking-tight">Fin Forge</p>
-    <p className="text-xs text-slate-500 dark:text-slate-400">Financial Management Website</p>
-  </div>
-</div>
+            <img
+              src={logo}
+              alt="Fin Forge logo"
+              className="w-10 h-10 rounded-2xl shadow-lg shadow-blue-500/20"
+            />
+            <div>
+              <p className="font-bold text-slate-900 dark:text-white tracking-tight">Fin Forge</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Financial Management Website</p>
+            </div>
+          </div>
 
 
           <div className="flex items-center gap-3">
@@ -316,88 +316,6 @@ export default function LandingPage() {
       </section>
 
       <section className="py-20">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="grid lg:grid-cols-2 gap-8 items-center">
-            <div className="reveal opacity-0 translate-y-4 transition-all duration-700">
-              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-600 dark:text-emerald-400">
-                Why It Works
-              </p>
-              <h2 className="mt-4 text-4xl font-black tracking-tight text-slate-950 dark:text-white">
-                Designed to help users understand money, not just store data
-              </h2>
-              <p className="mt-5 text-lg leading-8 text-slate-600 dark:text-slate-300">
-                Fin Forge combines a responsive interface, user-level security, and clean analytics so the product
-                feels practical for everyday use and polished enough to showcase professionally.
-              </p>
-
-              <div className="mt-8 space-y-4">
-                {[
-                  {
-                    icon: CreditCard,
-                    title: 'Transaction-first flow',
-                    desc: 'Users can add, edit, and review financial activity through a clear interface.'
-                  },
-                  {
-                    icon: ShieldCheck,
-                    title: 'Authenticated experience',
-                    desc: 'Protected routes and secure access keep dashboard data scoped to the signed-in user.'
-                  },
-                  {
-                    icon: Sparkles,
-                    title: 'Modern presentation',
-                    desc: 'Strong visual hierarchy, dark mode support, and responsive layouts keep the experience polished.'
-                  }
-                ].map((item) => {
-                  const Icon = item.icon
-
-                  return (
-                    <div key={item.title} className="flex gap-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/60 p-4">
-                      <div className="w-11 h-11 rounded-2xl bg-slate-100 dark:bg-slate-900 flex items-center justify-center flex-shrink-0">
-                        <Icon className="w-5 h-5 text-slate-700 dark:text-slate-200" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-slate-950 dark:text-white">{item.title}</h3>
-                        <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{item.desc}</p>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-
-            <div className="reveal opacity-0 translate-y-6 transition-all duration-700 delay-100">
-              <div className="rounded-[2rem] border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 p-8 text-white shadow-2xl">
-                <p className="text-sm uppercase tracking-[0.24em] text-blue-200">Built For</p>
-                <h3 className="mt-3 text-3xl font-black">A strong project portfolio piece</h3>
-                <p className="mt-4 text-slate-300 leading-7">
-                  The website shows both frontend polish and backend capability through authentication,
-                  dashboard views, analytics, and structured transaction handling.
-                </p>
-
-                <div className="mt-8 grid grid-cols-2 gap-4">
-                  {[
-                    'React + Vite',
-                    'Tailwind CSS',
-                    'Node + Express',
-                    'MongoDB + JWT'
-                  ].map((tech) => (
-                    <div key={tech} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm font-semibold text-slate-100">
-                      {tech}
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-5">
-                  <p className="text-sm text-slate-300">Project Positioning</p>
-                  <p className="mt-2 text-xl font-bold">Full-Stack Financial Management Website</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-20">
         <div className="max-w-5xl mx-auto px-6">
           <div className="reveal opacity-0 translate-y-4 transition-all duration-700 rounded-[2rem] overflow-hidden bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-500 p-[1px] shadow-2xl shadow-blue-500/20">
             <div className="rounded-[calc(2rem-1px)] bg-slate-950 px-8 py-12 text-center">
@@ -433,16 +351,16 @@ export default function LandingPage() {
       <footer className="border-t border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-950/80">
         <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-  <img
-    src={logo}
-    alt="Fin Forge logo"
-    className="w-10 h-10 rounded-2xl"
-  />
-  <div>
-    <p className="font-bold text-slate-950 dark:text-white">Fin Forge</p>
-    <p className="text-sm text-slate-500 dark:text-slate-400">Full-Stack Financial Management Website</p>
-  </div>
-</div>
+            <img
+              src={logo}
+              alt="Fin Forge logo"
+              className="w-10 h-10 rounded-2xl"
+            />
+            <div>
+              <p className="font-bold text-slate-950 dark:text-white">Fin Forge</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Full-Stack Financial Management Website</p>
+            </div>
+          </div>
 
 
           <p className="text-sm text-slate-500 dark:text-slate-400 text-center">
