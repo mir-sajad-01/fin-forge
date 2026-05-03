@@ -1,6 +1,6 @@
 import { useData } from '../context/DataContext'
 import { useCurrency } from '../hooks/useCurrency'
-import {  formatDate, getCategoryColor } from '../utils/helpers'
+import { formatDate, getCategoryColor } from '../utils/helpers'
 import { Trash2, Edit2 } from 'lucide-react'
 
 export default function TransactionTable({ transactions, onEdit, onDelete }) {
@@ -30,57 +30,61 @@ export default function TransactionTable({ transactions, onEdit, onDelete }) {
                 </td>
               </tr>
             ) : (
-              transactions.map((transaction) => (
-                <tr key={transaction._id} className="hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                  <td className="px-6 py-4 text-sm text-slate-900 dark:text-slate-200">{formatDate(transaction.date)}</td>
-                  <td className="px-6 py-4 text-sm text-slate-900 dark:text-slate-200">{transaction.description}</td>
-                  <td className="px-6 py-4 text-sm">
-                    <span
-                      className="inline-block px-3 py-1 rounded-full text-xs font-medium text-white"
-                      style={{ backgroundColor: getCategoryColor(transaction.category) }}
-                    >
-                      {transaction.category}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm">
-                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${transaction.type === 'income'
+              transactions.map((transaction) => {
+                const type = transaction.type === 'income' ? 'income' : 'expense'
+                const category = transaction.category || 'Uncategorized'
+
+                return (
+                  <tr key={transaction._id} className="hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                    <td className="px-6 py-4 text-sm text-slate-900 dark:text-slate-200">{formatDate(transaction.date)}</td>
+                    <td className="px-6 py-4 text-sm text-slate-900 dark:text-slate-200">{transaction.description || 'No description'}</td>
+                    <td className="px-6 py-4 text-sm">
+                      <span
+                        className="inline-block px-3 py-1 rounded-full text-xs font-medium text-white"
+                        style={{ backgroundColor: getCategoryColor(category) }}
+                      >
+                        {category}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${type === 'income'
                         ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200'
                         : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200'
                       }`}>
-                      {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}
-                    </span>
-                  </td>
-                  <td className={`px-6 py-4 text-sm font-medium text-right ${transaction.type === 'income'
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                      </span>
+                    </td>
+                    <td className={`px-6 py-4 text-sm font-medium text-right ${type === 'income'
                       ? 'text-green-600 dark:text-green-400'
                       : 'text-red-600 dark:text-red-400'
                     }`}>
-                    {transaction.type === 'income' ? '+' : '-'}{format(transaction.amount)}
-                  </td>
-                  {role === 'admin' && (
-                    <td className="px-6 py-4 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => onEdit(transaction)}
-                          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-blue-600 dark:text-blue-400"
-                          aria-label="Edit transaction"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => onDelete(transaction._id)}
-                          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-red-600 dark:text-red-400"
-                          aria-label="Delete transaction"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                      {type === 'income' ? '+' : '-'}{format(transaction.amount)}
                     </td>
-                  )}
-                </tr>
-              ))
+                    {role === 'admin' && (
+                      <td className="px-6 py-4 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => onEdit(transaction)}
+                            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-blue-600 dark:text-blue-400"
+                            aria-label="Edit transaction"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => onDelete(transaction._id)}
+                            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-red-600 dark:text-red-400"
+                            aria-label="Delete transaction"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                )
+              })
 
             )}
-            { }
           </tbody>
         </table>
       </div>

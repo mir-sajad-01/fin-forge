@@ -8,8 +8,17 @@ const router = express.Router()
 
 function validateTransactionInput(body) {
   const { date, amount, category, type, description } = body
+  const parsedDate = new Date(date)
 
-  if (!date || !category || !type || !description?.trim()) {
+  if (!date || Number.isNaN(parsedDate.getTime())) {
+    return 'Valid date is required'
+  }
+
+  if (typeof category !== 'string' || !category.trim()) {
+    return 'Category is required'
+  }
+
+  if (typeof description !== 'string' || !description.trim()) {
     return 'All fields are required'
   }
 
@@ -29,7 +38,7 @@ function buildTransactionPayload(body, userId) {
     userId,
     date: body.date,
     amount: Number(body.amount),
-    category: body.category,
+    category: body.category.trim(),
     type: body.type,
     description: body.description.trim()
   }

@@ -13,6 +13,10 @@ module.exports = function (req, res, next) {
     return res.status(401).json({ message: 'No token' })
   }
 
+  if (!process.env.JWT_SECRET) {
+    return res.status(500).json({ message: 'Authentication is not configured' })
+  }
+
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
     req.user = decoded

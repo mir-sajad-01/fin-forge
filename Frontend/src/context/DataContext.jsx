@@ -1,7 +1,8 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
 const DataContext = createContext()
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '')
+const SUPPORTED_CURRENCIES = ['INR', 'USD', 'EUR', 'GBP', 'JPY']
 
 function readStoredUser() {
   const storedUser = localStorage.getItem('user')
@@ -33,6 +34,8 @@ export function DataProvider({ children }) {
   const [role, setRole] = useState(() => localStorage.getItem('role') || 'viewer')
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true')
   const [currency, setCurrency] = useState(() => localStorage.getItem('currency') || 'INR')
+  const [isLoadingTransactions, setIsLoadingTransactions] = useState(false)
+  const [dataError, setDataError] = useState('')
   const [exchangeRates, setExchangeRates] = useState({
     INR: 1,
     USD: 0.012,
@@ -41,33 +44,43 @@ export function DataProvider({ children }) {
     JPY: 1.78
   })
 
-  const clearSession = () => {
+  const clearSession = useCallback(() => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
     setToken('')
     setUser(null)
     setTransactions([])
     setRole('viewer')
-  }
+  }, [])
 
-  const persistSession = (nextToken, nextUser) => {
+  const persistSession = useCallback((nextToken, nextUser) => {
     localStorage.setItem('token', nextToken)
     localStorage.setItem('user', JSON.stringify(nextUser))
     setToken(nextToken)
     setUser(nextUser)
-  }
+    setDataError('')
+  }, [])
 
-  const request = async (path, options = {}) => {
-    const headers = { ...(options.headers || {}) }
+  const request = useCallback(async (path, options = {}) => {
+    const headers = {
+      Accept: 'application/json',
+      ...(options.headers || {})
+    }
 
     if (token) {
       headers.Authorization = `Bearer ${token}`
     }
 
-    const response = await fetch(`${API_BASE_URL}${path}`, {
-      ...options,
-      headers
-    })
+    let response
+
+    try {
+      response = await fetch(`${API_BASE_URL}${path}`, {
+        ...options,
+        headers
+      })
+    } catch {
+      throw new Error('Unable to reach the server. Please make sure the backend is running.')
+    }
 
     const data = await parseJsonSafely(response)
 
@@ -82,7 +95,7 @@ export function DataProvider({ children }) {
     }
 
     return data
-  }
+  }, [clearSession, token])
 
   useEffect(() => {
     const fetchRates = async () => {
@@ -123,8 +136,8 @@ export function DataProvider({ children }) {
           localStorage.setItem('exchangeRates', JSON.stringify(rates))
           localStorage.setItem('exchangeRatesTime', String(Date.now()))
         }
-      } catch (error) {
-        console.error('Exchange rate fetch failed, using fallback rates', error)
+      } catch {
+        // Fallback rates keep currency formatting usable when the external API is unavailable.
       }
     }
 
@@ -134,20 +147,29 @@ export function DataProvider({ children }) {
   useEffect(() => {
     if (!token) {
       setTransactions([])
+      setIsLoadingTransactions(false)
+      setDataError('')
       return
     }
 
     const fetchTransactions = async () => {
+      setIsLoadingTransactions(true)
+      setDataError('')
+
       try {
         const data = await request('/api/transactions')
         setTransactions(Array.isArray(data) ? data : [])
       } catch (error) {
-        console.error(error)
+        if (error.status !== 401) {
+          setDataError(error.message)
+        }
+      } finally {
+        setIsLoadingTransactions(false)
       }
     }
 
     fetchTransactions()
-  }, [token])
+  }, [request, token])
 
   useEffect(() => {
     if (!token) {
@@ -161,12 +183,14 @@ export function DataProvider({ children }) {
         setUser(data)
         localStorage.setItem('user', JSON.stringify(data))
       } catch (error) {
-        console.error(error)
+        if (error.status !== 401) {
+          setDataError(error.message)
+        }
       }
     }
 
     fetchUser()
-  }, [token])
+  }, [request, token])
 
   useEffect(() => {
     localStorage.setItem('role', role)
@@ -195,6 +219,10 @@ export function DataProvider({ children }) {
       },
       body: JSON.stringify({ email, password })
     })
+
+    if (!data?.token || !data?.user) {
+      throw new Error('Login response was incomplete. Please try again.')
+    }
 
     persistSession(data.token, data.user)
     return data.user
@@ -260,7 +288,7 @@ export function DataProvider({ children }) {
   }
 
   const changeCurrency = (newCurrency) => {
-    setCurrency(newCurrency)
+    setCurrency(SUPPORTED_CURRENCIES.includes(newCurrency) ? newCurrency : 'INR')
   }
 
   return (
@@ -271,6 +299,8 @@ export function DataProvider({ children }) {
       user,
       darkMode,
       currency,
+      isLoadingTransactions,
+      dataError,
       exchangeRates,
       login,
       register,

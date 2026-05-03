@@ -13,7 +13,7 @@ export default function SummaryCard({ title, value, icon, color, trend }) {
       </div>
       {trend && (
         <div className={`text-xs font-medium ${trend.positive ? 'text-green-100' : 'text-red-100'}`}>
-          {trend.positive ? '↑' : '↓'} {trend.value}
+          {trend.positive ? '\u2191' : '\u2193'} {trend.value}
         </div>
       )}
     </div>

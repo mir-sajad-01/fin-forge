@@ -1,17 +1,32 @@
 import { useMemo } from 'react'
 import { useData } from '../context/DataContext'
 
+function getAmount(transaction) {
+  const amount = Number(transaction.amount)
+  return Number.isFinite(amount) ? amount : 0
+}
+
+function getMonthKey(dateValue) {
+  const date = new Date(dateValue)
+
+  if (Number.isNaN(date.getTime())) {
+    return null
+  }
+
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+}
+
 export function useFinancialData() {
   const { transactions } = useData()
 
   const summary = useMemo(() => {
     const income = transactions
       .filter(t => t.type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + getAmount(t), 0)
     
     const expenses = transactions
       .filter(t => t.type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + getAmount(t), 0)
 
     return {
       income,
@@ -25,7 +40,8 @@ export function useFinancialData() {
     transactions
       .filter(t => t.type === 'expense')
       .forEach(t => {
-        breakdown[t.category] = (breakdown[t.category] || 0) + t.amount
+        const category = t.category || 'Uncategorized'
+        breakdown[category] = (breakdown[category] || 0) + getAmount(t)
       })
     
     return Object.entries(breakdown)
@@ -37,17 +53,20 @@ export function useFinancialData() {
     const monthlyData = {}
     
     transactions.forEach(t => {
-      const date = new Date(t.date)
-      const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+      const month = getMonthKey(t.date)
+
+      if (!month) {
+        return
+      }
       
       if (!monthlyData[month]) {
         monthlyData[month] = { month, income: 0, expenses: 0 }
       }
       
       if (t.type === 'income') {
-        monthlyData[month].income += t.amount
+        monthlyData[month].income += getAmount(t)
       } else {
-        monthlyData[month].expenses += t.amount
+        monthlyData[month].expenses += getAmount(t)
       }
     })
 

@@ -6,11 +6,12 @@ import TransactionForm from './TransactionForm'
 import TransactionTable from './TransactionTable'
 
 export default function TransactionsSection({ openForm = false, setOpenForm }) {
-  const { transactions, deleteTransaction, role } = useData()
+  const { transactions, deleteTransaction, role, isLoadingTransactions, dataError } = useData()
   const [internalShowForm, setInternalShowForm] = useState(false)
+  const [actionError, setActionError] = useState('')
 
-const showForm = typeof setOpenForm === 'function' ? openForm : internalShowForm
-const setShowForm = typeof setOpenForm === 'function' ? setOpenForm : setInternalShowForm
+  const showForm = typeof setOpenForm === 'function' ? openForm : internalShowForm
+  const setShowForm = typeof setOpenForm === 'function' ? setOpenForm : setInternalShowForm
 
   const [editingId, setEditingId] = useState(null)
   const [filters, setFilters] = useState({
@@ -25,9 +26,15 @@ const setShowForm = typeof setOpenForm === 'function' ? setOpenForm : setInterna
   let filtered = filterTransactions(transactions, filters)
   filtered = getSortedTransactions(filtered, filters.sortBy)
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this transaction?')) {
-      deleteTransaction(id)
+      setActionError('')
+
+      try {
+        await deleteTransaction(id)
+      } catch (error) {
+        setActionError(error.message)
+      }
     }
   }
 
@@ -103,6 +110,7 @@ const setShowForm = typeof setOpenForm === 'function' ? setOpenForm : setInterna
             <button
               onClick={() => {
                 setEditingId(null)
+                setActionError('')
                 setShowForm(!showForm)
               }}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors whitespace-nowrap"
@@ -112,6 +120,12 @@ const setShowForm = typeof setOpenForm === 'function' ? setOpenForm : setInterna
             </button>
           )}
         </div>
+
+        {(dataError || actionError) && (
+          <p className="text-sm text-red-600 dark:text-red-400">
+            {dataError || actionError}
+          </p>
+        )}
       </div>
 
       {/* Transactions Table */}
@@ -132,8 +146,12 @@ const setShowForm = typeof setOpenForm === 'function' ? setOpenForm : setInterna
               No transactions found
             </h3>
             <p className="text-slate-500 dark:text-slate-400 text-sm">
-              {transactions.length === 0
-                ? 'Add your first transaction using the button above'
+              {isLoadingTransactions
+                ? 'Loading transactions...'
+                : transactions.length === 0
+                ? role === 'admin'
+                  ? 'Add your first transaction using the button above'
+                  : 'Switch to admin mode to add your first transaction'
                 : 'Try adjusting your filters'}
             </p>
           </div>
@@ -144,4 +162,3 @@ const setShowForm = typeof setOpenForm === 'function' ? setOpenForm : setInterna
     </div>
   )
 }
-

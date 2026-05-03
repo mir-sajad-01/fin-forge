@@ -19,7 +19,7 @@ export default function TransactionForm({ editingId, onClose }) {
       const transaction = transactions.find(item => item._id === editingId)
 
       if (transaction) {
-        const rate = exchangeRates[currency] || 1
+        const rate = Number(exchangeRates[currency]) || 1
 
         return {
           date: transaction.date,
@@ -72,7 +72,7 @@ export default function TransactionForm({ editingId, onClose }) {
     setSubmitError('')
     setIsSubmitting(true)
 
-    const rate = exchangeRates[currency] || 1
+    const rate = Number(exchangeRates[currency]) || 1
     const amountInInr = Number(formData.amount) / rate
     const payload = {
       ...formData,

@@ -20,29 +20,31 @@ router.post('/register', async (req, res) => {
   try {
     const { name, email, password } = req.body
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    const nameValue = typeof name === 'string' ? name.trim() : ''
+    const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : ''
+    const passwordValue = typeof password === 'string' ? password : ''
 
-    if (!name || !name.trim()) {
+    if (!nameValue) {
       return res.status(400).json({ message: 'Name is required' })
     }
 
-    if (!emailRegex.test(email || '')) {
+    if (!emailRegex.test(normalizedEmail)) {
       return res.status(400).json({ message: 'Invalid email format' })
     }
 
-    if (!password || password.length < 6) {
+    if (passwordValue.length < 6) {
       return res.status(400).json({ message: 'Password must be at least 6 characters' })
     }
 
-    const normalizedEmail = email.trim().toLowerCase()
     const existingUser = await User.findOne({ email: normalizedEmail })
 
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' })
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10)
+    const hashedPassword = await bcrypt.hash(passwordValue, 10)
     const user = new User({
-      name: name.trim(),
+      name: nameValue,
       email: normalizedEmail,
       password: hashedPassword
     })
@@ -58,9 +60,10 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body
-    const normalizedEmail = (email || '').trim().toLowerCase()
+    const normalizedEmail = typeof email === 'string' ? email.trim().toLowerCase() : ''
+    const passwordValue = typeof password === 'string' ? password : ''
 
-    if (!normalizedEmail || !password) {
+    if (!normalizedEmail || !passwordValue) {
       return res.status(400).json({ message: 'Email and password are required' })
     }
 
@@ -70,7 +73,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'User not found' })
     }
 
-    const isMatch = await bcrypt.compare(password, user.password)
+    const isMatch = await bcrypt.compare(passwordValue, user.password)
 
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid password' })
