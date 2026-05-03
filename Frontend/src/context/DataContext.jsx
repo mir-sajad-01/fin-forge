@@ -4,6 +4,10 @@ const DataContext = createContext()
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/\/$/, '')
 const SUPPORTED_CURRENCIES = ['INR', 'USD', 'EUR', 'GBP', 'JPY']
 
+function readStoredAccessToken() {
+  return localStorage.getItem('accessToken') || localStorage.getItem('token') || ''
+}
+
 function readStoredUser() {
   const storedUser = localStorage.getItem('user')
 
@@ -29,11 +33,12 @@ async function parseJsonSafely(response) {
 
 export function DataProvider({ children }) {
   const [transactions, setTransactions] = useState([])
-  const [token, setToken] = useState(() => localStorage.getItem('token') || '')
+  const [accessToken, setAccessToken] = useState(() => readStoredAccessToken())
   const [user, setUser] = useState(() => readStoredUser())
   const [role, setRole] = useState(() => localStorage.getItem('role') || 'viewer')
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('darkMode') === 'true')
   const [currency, setCurrency] = useState(() => localStorage.getItem('currency') || 'INR')
+  const [isAuthReady, setIsAuthReady] = useState(false)
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(false)
   const [dataError, setDataError] = useState('')
   const [exchangeRates, setExchangeRates] = useState({
@@ -44,58 +49,135 @@ export function DataProvider({ children }) {
     JPY: 1.78
   })
 
-  const clearSession = useCallback(() => {
+  const clearLocalSession = useCallback(() => {
+    localStorage.removeItem('accessToken')
     localStorage.removeItem('token')
     localStorage.removeItem('user')
-    setToken('')
+    setAccessToken('')
     setUser(null)
     setTransactions([])
     setRole('viewer')
+    setIsAuthReady(true)
   }, [])
 
-  const persistSession = useCallback((nextToken, nextUser) => {
-    localStorage.setItem('token', nextToken)
+  const persistSession = useCallback((nextAccessToken, nextUser) => {
+    localStorage.setItem('accessToken', nextAccessToken)
+    localStorage.removeItem('token')
     localStorage.setItem('user', JSON.stringify(nextUser))
-    setToken(nextToken)
+    setAccessToken(nextAccessToken)
     setUser(nextUser)
+    setIsAuthReady(true)
     setDataError('')
   }, [])
 
-  const request = useCallback(async (path, options = {}) => {
-    const headers = {
-      Accept: 'application/json',
-      ...(options.headers || {})
-    }
-
-    if (token) {
-      headers.Authorization = `Bearer ${token}`
-    }
-
+  const refreshAccessToken = useCallback(async () => {
     let response
 
     try {
-      response = await fetch(`${API_BASE_URL}${path}`, {
-        ...options,
-        headers
+      response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          Accept: 'application/json'
+        }
       })
     } catch {
-      throw new Error('Unable to reach the server. Please make sure the backend is running.')
+      clearLocalSession()
+      throw new Error('Unable to refresh your session. Please log in again.')
     }
 
     const data = await parseJsonSafely(response)
 
-    if (!response.ok) {
-      if (response.status === 401) {
-        clearSession()
+    if (!response.ok || !data?.accessToken) {
+      clearLocalSession()
+      throw new Error(data?.message || 'Session expired. Please log in again.')
+    }
+
+    persistSession(data.accessToken, data.user || user)
+    return data.accessToken
+  }, [clearLocalSession, persistSession, user])
+
+  const request = useCallback(async (path, options = {}) => {
+    const { retryOnUnauthorized = true, ...fetchOptions } = options
+
+    const makeRequest = async (currentAccessToken) => {
+      const headers = {
+        Accept: 'application/json',
+        ...(fetchOptions.headers || {})
       }
 
-      const error = new Error(data?.message || data?.error || 'Request failed')
-      error.status = response.status
+      if (currentAccessToken) {
+        headers.Authorization = `Bearer ${currentAccessToken}`
+      }
+
+      let response
+
+      try {
+        response = await fetch(`${API_BASE_URL}${path}`, {
+          ...fetchOptions,
+          credentials: 'include',
+          headers
+        })
+      } catch {
+        throw new Error('Unable to reach the server. Please make sure the backend is running.')
+      }
+
+      return {
+        response,
+        data: await parseJsonSafely(response)
+      }
+    }
+
+    let result = await makeRequest(accessToken)
+
+    if (result.response.status === 401 && retryOnUnauthorized) {
+      try {
+        const nextAccessToken = await refreshAccessToken()
+        result = await makeRequest(nextAccessToken)
+      } catch {
+        // The final 401 handling below clears local state and reports the original request failure.
+      }
+    }
+
+    if (!result.response.ok) {
+      if (result.response.status === 401) {
+        clearLocalSession()
+      }
+
+      const error = new Error(result.data?.message || result.data?.error || 'Request failed')
+      error.status = result.response.status
       throw error
     }
 
-    return data
-  }, [clearSession, token])
+    return result.data
+  }, [accessToken, clearLocalSession, refreshAccessToken])
+
+  useEffect(() => {
+    let isMounted = true
+
+    const restoreSession = async () => {
+      if (accessToken) {
+        setIsAuthReady(true)
+        return
+      }
+
+      try {
+        await refreshAccessToken()
+      } catch {
+        // Missing or expired refresh cookies are expected for logged-out visitors.
+      } finally {
+        if (isMounted) {
+          setIsAuthReady(true)
+        }
+      }
+    }
+
+    restoreSession()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   useEffect(() => {
     const fetchRates = async () => {
@@ -145,7 +227,7 @@ export function DataProvider({ children }) {
   }, [])
 
   useEffect(() => {
-    if (!token) {
+    if (!accessToken) {
       setTransactions([])
       setIsLoadingTransactions(false)
       setDataError('')
@@ -169,10 +251,10 @@ export function DataProvider({ children }) {
     }
 
     fetchTransactions()
-  }, [request, token])
+  }, [accessToken, request])
 
   useEffect(() => {
-    if (!token) {
+    if (!accessToken) {
       setUser(null)
       return
     }
@@ -190,7 +272,7 @@ export function DataProvider({ children }) {
     }
 
     fetchUser()
-  }, [request, token])
+  }, [accessToken, request])
 
   useEffect(() => {
     localStorage.setItem('role', role)
@@ -214,17 +296,18 @@ export function DataProvider({ children }) {
   const login = async (email, password) => {
     const data = await request('/api/auth/login', {
       method: 'POST',
+      retryOnUnauthorized: false,
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ email, password })
     })
 
-    if (!data?.token || !data?.user) {
+    if (!data?.accessToken || !data?.user) {
       throw new Error('Login response was incomplete. Please try again.')
     }
 
-    persistSession(data.token, data.user)
+    persistSession(data.accessToken, data.user)
     return data.user
   }
 
@@ -275,6 +358,19 @@ export function DataProvider({ children }) {
     setTransactions(prev => prev.filter(transaction => transaction._id !== id))
   }
 
+  const logout = async () => {
+    try {
+      await request('/api/auth/logout', {
+        method: 'POST',
+        retryOnUnauthorized: false
+      })
+    } catch {
+      // Local logout should still complete if the backend is unavailable.
+    } finally {
+      clearLocalSession()
+    }
+  }
+
   const toggleRole = () => {
     setRole(currentRole => currentRole === 'viewer' ? 'admin' : 'viewer')
   }
@@ -294,17 +390,20 @@ export function DataProvider({ children }) {
   return (
     <DataContext.Provider value={{
       transactions,
-      token,
+      token: accessToken,
+      accessToken,
       role,
       user,
       darkMode,
       currency,
+      isAuthReady,
       isLoadingTransactions,
       dataError,
       exchangeRates,
       login,
       register,
-      clearSession,
+      logout,
+      clearSession: logout,
       changeCurrency,
       addTransaction,
       updateTransaction,

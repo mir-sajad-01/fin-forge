@@ -9,13 +9,20 @@ const transactionRoutes = require('./routes/transactions')
 const app = express()
 const requiredEnv = ['MONGO_URI', 'JWT_SECRET']
 const missingEnv = requiredEnv.filter(name => !process.env[name])
+const allowedOrigins = (process.env.CLIENT_URL || process.env.CLIENT_ORIGIN || '')
+  .split(',')
+  .map(origin => origin.trim())
+  .filter(Boolean)
 
 if (missingEnv.length > 0) {
   console.error(`Missing required environment variables: ${missingEnv.join(', ')}`)
   process.exit(1)
 }
 
-app.use(cors())
+app.use(cors({
+  origin: allowedOrigins.length > 0 ? allowedOrigins : true,
+  credentials: true
+}))
 app.use(express.json())
 
 app.use((error, req, res, next) => {

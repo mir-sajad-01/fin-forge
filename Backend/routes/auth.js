@@ -6,6 +6,73 @@ const User = require('../models/Users')
 const auth = require('../middleware/auth')
 
 const router = express.Router()
+const REFRESH_TOKEN_COOKIE = 'refreshToken'
+const ACCESS_TOKEN_EXPIRES_IN = '15m'
+const REFRESH_TOKEN_EXPIRES_IN = '7d'
+const REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60 * 1000
+
+function getRefreshSecret() {
+  return process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET
+}
+
+function getRefreshCookieOptions() {
+  const isProduction = process.env.NODE_ENV === 'production'
+
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+    maxAge: REFRESH_TOKEN_MAX_AGE,
+    path: '/api/auth'
+  }
+}
+
+function clearRefreshCookie(res) {
+  const cookieOptions = getRefreshCookieOptions()
+  delete cookieOptions.maxAge
+  res.clearCookie(REFRESH_TOKEN_COOKIE, cookieOptions)
+}
+
+function parseCookies(cookieHeader = '') {
+  return cookieHeader
+    .split(';')
+    .map(cookie => cookie.trim())
+    .filter(Boolean)
+    .reduce((cookies, cookie) => {
+      const separatorIndex = cookie.indexOf('=')
+
+      if (separatorIndex === -1) {
+        return cookies
+      }
+
+      const key = cookie.slice(0, separatorIndex)
+      const value = cookie.slice(separatorIndex + 1)
+
+      try {
+        cookies[key] = decodeURIComponent(value)
+      } catch {
+        cookies[key] = value
+      }
+
+      return cookies
+    }, {})
+}
+
+function createAccessToken(user) {
+  return jwt.sign(
+    { id: user._id, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: ACCESS_TOKEN_EXPIRES_IN }
+  )
+}
+
+function createRefreshToken(user) {
+  return jwt.sign(
+    { id: user._id, type: 'refresh' },
+    getRefreshSecret(),
+    { expiresIn: REFRESH_TOKEN_EXPIRES_IN }
+  )
+}
 
 function sanitizeUser(user) {
   return {
@@ -79,16 +146,52 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Invalid password' })
     }
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '1d' }
-    )
+    const accessToken = createAccessToken(user)
+    const refreshToken = createRefreshToken(user)
 
-    res.json({ token, user: sanitizeUser(user) })
+    res.cookie(REFRESH_TOKEN_COOKIE, refreshToken, getRefreshCookieOptions())
+
+    res.json({ accessToken, user: sanitizeUser(user) })
   } catch (error) {
     res.status(500).json({ error: error.message })
   }
+})
+
+router.post('/refresh', async (req, res) => {
+  try {
+    const cookies = parseCookies(req.headers.cookie)
+    const refreshToken = cookies[REFRESH_TOKEN_COOKIE]
+
+    if (!refreshToken) {
+      return res.status(401).json({ message: 'Refresh token is required' })
+    }
+
+    const decoded = jwt.verify(refreshToken, getRefreshSecret())
+
+    if (decoded.type !== 'refresh') {
+      clearRefreshCookie(res)
+      return res.status(401).json({ message: 'Invalid refresh token' })
+    }
+
+    const user = await User.findById(decoded.id)
+
+    if (!user) {
+      clearRefreshCookie(res)
+      return res.status(401).json({ message: 'Invalid refresh token' })
+    }
+
+    const accessToken = createAccessToken(user)
+
+    res.json({ accessToken, user: sanitizeUser(user) })
+  } catch (error) {
+    clearRefreshCookie(res)
+    res.status(401).json({ message: 'Invalid refresh token' })
+  }
+})
+
+router.post('/logout', (req, res) => {
+  clearRefreshCookie(res)
+  res.json({ message: 'Logged out successfully' })
 })
 
 router.get('/me', auth, async (req, res) => {

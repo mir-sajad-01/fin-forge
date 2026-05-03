@@ -17,7 +17,11 @@ function PageFallback() {
 }
 
 function ProtectedRoute({ children }) {
-  const { token } = useData()
+  const { isAuthReady, token } = useData()
+
+  if (!isAuthReady) {
+    return <PageFallback />
+  }
 
   if (!token) {
     return <Navigate to="/login" replace />
@@ -66,5 +70,4 @@ export default function App() {
     </DataProvider>
   )
 }
-
 

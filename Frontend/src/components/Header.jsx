@@ -23,7 +23,7 @@ toggleDarkMode,
 user,
 currency,
 changeCurrency,
-clearSession
+logout
 } = useData()
 
 const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -47,8 +47,8 @@ return () => {
 
 }, [])
 
-const handleLogout = () => {
-clearSession()
+const handleLogout = async () => {
+await logout()
 navigate('/login', { replace: true })
 }
 

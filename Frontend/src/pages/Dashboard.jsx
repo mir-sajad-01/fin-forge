@@ -6,15 +6,15 @@ import { useNavigate } from 'react-router-dom'
 import { useData } from '../context/DataContext'
 export default function Dashboard() {
   const navigate = useNavigate()
-  const { setRoleMode } = useData()
+  const { isAuthReady, setRoleMode, token } = useData()
   const [activeTab, setActiveTab] = useState('overview')
   const [openTransactionForm, setOpenTransactionForm] = useState(false)
 
   useEffect(() => {
-    if (!localStorage.getItem('token')) {
-      navigate('/login')
+    if (isAuthReady && !token) {
+      navigate('/login', { replace: true })
     }
-  }, [navigate])
+  }, [isAuthReady, navigate, token])
 
   const handleAddFirstTransaction = () => {
   setRoleMode('admin')
