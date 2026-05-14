@@ -7,6 +7,7 @@ const Dashboard = lazy(() => import('./pages/Dashboard'))
 const Login = lazy(() => import('./pages/Login'))
 const Register = lazy(() => import('./pages/Register'))
 const LandingPage = lazy(() => import('./pages/LandingPage'))
+const Profile = lazy(() => import('./pages/Profile'))
 
 function PageFallback() {
   return (
@@ -51,6 +52,14 @@ function AppContent() {
                 </ProtectedRoute>
               )}
             />
+            <Route
+              path="/profile"
+              element={(
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              )}
+            />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="*" element={<Navigate to="/" replace />} />
@@ -70,4 +79,3 @@ export default function App() {
     </DataProvider>
   )
 }
-
