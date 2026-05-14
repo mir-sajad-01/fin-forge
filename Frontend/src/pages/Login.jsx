@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
 import { useData } from '../context/DataContext'
+import logo from '../assets/finforge-logo.svg'
 
 function Login() {
   const navigate = useNavigate()
@@ -27,20 +27,28 @@ function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-200">
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-200">
+      <nav className="fixed inset-x-0 top-0 z-20 border-b border-white/60 bg-white/80 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-6xl items-center px-6">
+          <Link
+            to="/"
+            aria-label="Go to landing page"
+            className="flex items-center gap-3 rounded-xl transition hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+          >
+            <img src={logo} alt="Fin Forge logo" className="h-10 w-10 rounded-xl shadow-sm" />
+            <div>
+              <p className="text-sm font-bold text-slate-900">Fin Forge</p>
+              <p className="text-xs text-slate-500">Financial management</p>
+            </div>
+          </Link>
+        </div>
+      </nav>
+
+      <div className="flex min-h-screen items-center justify-center px-4 pb-8 pt-24">
       <form 
         onSubmit={handleLogin} 
-        className="relative bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-xl w-80 border border-gray-200"
+        className="bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-xl w-80 border border-gray-200"
       >
-        <Link
-          to="/"
-          aria-label="Back to landing page"
-          title="Back to home"
-          className="absolute left-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full text-gray-500 transition hover:bg-blue-50 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
-
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
           Welcome Back 👋
         </h2>
@@ -81,6 +89,7 @@ function Login() {
           </Link>
         </p>
       </form>
+      </div>
     </div>
   )
 }
